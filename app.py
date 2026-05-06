@@ -14,7 +14,7 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
-    # 1. Bảng lưu log đèn giao thông
+    # Bảng lưu log đèn giao thông
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS traffic_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +25,7 @@ def init_db():
         )
     """)
     
-    # 2. Bảng lưu tài khoản người dùng
+    # Bảng lưu tài khoản người dùng
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +35,7 @@ def init_db():
         )
     """)
     
-    # 3. Bảng lưu lịch sử đăng nhập
+    # Bảng lưu lịch sử đăng nhập
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS login_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,7 +55,9 @@ def init_db():
 
 init_db()
 
-# --- CÁC API ĐĂNG NHẬP ---
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html")
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -71,7 +73,6 @@ def login():
     if user:
         role = user[0]
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # Lưu lịch sử đăng nhập
         cursor.execute("INSERT INTO login_history (username, login_time) VALUES (?, ?)", (username, now))
         conn.commit()
         conn.close()
@@ -79,9 +80,6 @@ def login():
     
     conn.close()
     return jsonify({"message": "Sai tài khoản hoặc mật khẩu!"}), 401
-
-
-# --- CÁC API HỆ THỐNG GIAO THÔNG ---
 
 @app.route("/api/log", methods=["POST"])
 def save_log():
@@ -102,7 +100,19 @@ def get_logs():
     cursor.execute("SELECT * FROM traffic_log ORDER BY id DESC LIMIT 50")
     rows = cursor.fetchall()
     conn.close()
-    logs = [{"id": r[0], "time": r[1], "mode": r[2], "light": r[3], "remaining": r[4]} for r in rows]
+    
+    logs = []
+    for r in rows:
+        light_state = r[3].lower()
+        display_light = "yellow" if light_state == "yellow" else light_state
+            
+        logs.append({
+            "id": r[0],
+            "time": r[1],
+            "mode": r[2],
+            "light": display_light,
+            "remaining": r[4]
+        })
     return jsonify(logs), 200
 
 @app.route("/api/override", methods=["POST"])
@@ -110,9 +120,8 @@ def set_override():
     global override_status
     data = request.json
     mode = data.get("mode")
-    username = data.get("username") # Lấy tên user gửi lên từ giao diện
+    username = data.get("username")
     
-    # Kiểm tra quyền trong Database
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT role FROM users WHERE username=?", (username,))
@@ -127,9 +136,10 @@ def set_override():
         return jsonify({"message": f"Chuyển chế độ: {mode.upper()}", "status": override_status}), 200
     return jsonify({"message": "Chế độ không hợp lệ"}), 400
 
-@app.route("/", methods=["GET"])
-def home():
-    return render_template("index.html")
+@app.route("/api/override", methods=["GET"])
+def get_override():
+    global override_status
+    return jsonify(override_status), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

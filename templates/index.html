@@ -82,7 +82,6 @@
     .btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
     .btn-override { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 4px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: #fff; background: #0a1520; transition: 0.2s;}
     .btn-peak:hover { background: var(--danger); } .btn-normal-mode:hover { background: var(--green); color: #000; } .btn-auto-mode:hover { background: var(--accent); color: #000; }
-    /* Lớp phủ vô hiệu hóa cho Khách */
     .disabled-panel { opacity: 0.3; pointer-events: none; position: relative;}
     #noAccessMsg { display: none; color: var(--danger); font-size: 11px; text-align: center; margin-top: 10px; font-family: 'Share Tech Mono';}
 
@@ -182,7 +181,6 @@
   <div id="toast"></div>
 
   <script>
-    // --- QUẢN LÝ ĐĂNG NHẬP & PHÂN QUYỀN ---
     function checkLoginStatus() {
       const savedUser = localStorage.getItem('traffic_username');
       const savedRole = localStorage.getItem('traffic_role');
@@ -191,12 +189,10 @@
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('mainApp').style.display = 'flex';
         
-        // Hiển thị thông tin user
         document.getElementById('displayUsername').textContent = savedUser.toUpperCase();
         const roleBadge = document.getElementById('displayRole');
         roleBadge.textContent = savedRole.toUpperCase();
         
-        // Phân quyền giao diện
         if (savedRole === 'admin') {
           roleBadge.className = 'role-badge role-admin';
           document.getElementById('controlPanel').classList.remove('disabled-panel');
@@ -242,7 +238,6 @@
       checkLoginStatus();
     }
 
-    // --- LOGIC HỆ THỐNG GIAO THÔNG (Giữ nguyên) ---
     function updateSysTime() {
       const now = new Date(); document.getElementById('sysTime').innerText = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
     }
@@ -260,7 +255,7 @@
       fetch('/api/override', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: modeType, username: currentUser }), // Gửi kèm tên để server ktra
+        body: JSON.stringify({ mode: modeType, username: currentUser }),
       })
       .then(res => res.json().then(data => ({ status: res.status, body: data })))
       .then(res => {
@@ -287,7 +282,7 @@
     animateCars();
 
     function fetchLogs() {
-      if(document.getElementById('mainApp').style.display === 'none') return; // Không lấy log nếu chưa đăng nhập
+      if(document.getElementById('mainApp').style.display === 'none') return;
       fetch('/api/logs')
         .then(response => response.json())
         .then(data => {
@@ -310,13 +305,21 @@
           else if (current.light === 'yellow') { document.getElementById('yellowCount').textContent = current.remaining; document.getElementById('boxYellow').classList.add('active'); }
           else if (current.light === 'red') { document.getElementById('redCount').textContent = current.remaining; document.getElementById('boxRed').classList.add('active'); }
 
-          let subColor = (current.light === 'red') ? mapColors['green'] : mapColors['red'];
-          document.getElementById('tl-main-1').setAttribute('fill', mapColors[current.light]); document.getElementById('tl-main-2').setAttribute('fill', mapColors[current.light]);
-          document.getElementById('tl-sub-1').setAttribute('fill', subColor); document.getElementById('tl-sub-2').setAttribute('fill', subColor);
+          if (current.light === 'yellow') {
+            document.getElementById('tl-main-1').setAttribute('fill', mapColors['yellow']);
+            document.getElementById('tl-main-2').setAttribute('fill', mapColors['yellow']);
+            document.getElementById('tl-sub-1').setAttribute('fill', mapColors['yellow']);
+            document.getElementById('tl-sub-2').setAttribute('fill', mapColors['yellow']);
+          } else {
+            let subColor = (current.light === 'red') ? mapColors['green'] : mapColors['red'];
+            document.getElementById('tl-main-1').setAttribute('fill', mapColors[current.light]);
+            document.getElementById('tl-main-2').setAttribute('fill', mapColors[current.light]);
+            document.getElementById('tl-sub-1').setAttribute('fill', subColor);
+            document.getElementById('tl-sub-2').setAttribute('fill', subColor);
+          }
         }).catch(() => {});
     }
 
-    // Khởi chạy khi Load trang
     checkLoginStatus();
     setInterval(fetchLogs, 1000); 
   </script>
