@@ -217,7 +217,7 @@
       const p = document.getElementById('password').value;
       const err = document.getElementById('loginError');
 
-      fetch('http://127.0.0.1:5001/api/login', {
+      fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
@@ -257,7 +257,7 @@
 
     function sendOverrideMode(modeType) {
       const currentUser = localStorage.getItem('traffic_username');
-      fetch('http://127.0.0.1:5001/api/override', {
+      fetch('/api/override', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mode: modeType, username: currentUser }), // Gửi kèm tên để server ktra
@@ -288,7 +288,7 @@
 
     function fetchLogs() {
       if(document.getElementById('mainApp').style.display === 'none') return; // Không lấy log nếu chưa đăng nhập
-      fetch('http://127.0.0.1:5001/api/logs')
+      fetch('/api/logs')
         .then(response => response.json())
         .then(data => {
           if (!data || data.length === 0) return;
