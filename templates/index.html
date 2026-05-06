@@ -191,7 +191,6 @@
         
         document.getElementById('displayUsername').textContent = savedUser.toUpperCase();
         const roleBadge = document.getElementById('displayRole');
-        const roleBadge = document.getElementById('displayRole');
         roleBadge.textContent = savedRole.toUpperCase();
         
         if (savedRole === 'admin') {
@@ -283,7 +282,7 @@
     animateCars();
 
     function fetchLogs() {
-      if(document.getElementById('mainApp').style.display === 'none') return;
+      if (document.getElementById('mainApp').style.display === 'none') return;
       fetch('/api/logs')
         .then(response => response.json())
         .then(data => {
