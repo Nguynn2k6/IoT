@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCM Traffic Control System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050a0f; --panel: #080f18; --border: #0d2a3a;
+      --accent: #00d4ff; --accent2: #00ff9d; --danger: #ff3b3b;
+      --yellow: #ffd600; --green: #00ff9d; --red: #ff3b3b;
+      --muted: #2a4a5a; --text: #c8e8f0; --text-dim: #4a7a8a;
+      --glow-g: 0 0 20px rgba(0,255,157,0.8);
+      --glow-r: 0 0 20px rgba(255,59,59,0.8);
+      --glow-y: 0 0 20px rgba(255,214,0,0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; }
+
+    /* MÀN HÌNH ĐĂNG NHẬP */
+    #loginScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(3, 12, 21, 0.95); display: flex; justify-content: center; align-items: center; z-index: 1000;
+    }
+    .login-box {
+      background: var(--panel); border: 2px solid var(--border); padding: 40px; border-radius: 8px;
+      width: 350px; text-align: center; box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+    .login-box h2 { font-family: 'Orbitron', sans-serif; color: var(--accent); margin-bottom: 25px; letter-spacing: 2px; }
+    .input-group { margin-bottom: 15px; text-align: left; }
+    .input-group label { font-size: 12px; color: var(--text-dim); font-family: 'Orbitron', sans-serif; }
+    .input-group input {
+      width: 100%; padding: 10px; margin-top: 5px; background: rgba(0,0,0,0.5);
+      border: 1px solid var(--muted); color: var(--text); font-family: 'Share Tech Mono', monospace; outline: none;
+    }
+    .input-group input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+    .btn-login {
+      width: 100%; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent);
+      color: var(--accent); font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
+    }
+    .btn-login:hover { background: var(--accent); color: #000; }
+    #loginError { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 15px;}
+
+    /* MÀN HÌNH CHÍNH APP */
+    #mainApp { padding: 20px; display: none; flex-direction: column; height: 100%; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--accent); letter-spacing: 1px; }
+    .user-info { display: flex; align-items: center; gap: 15px; font-family: 'Share Tech Mono', monospace; font-size: 13px; }
+    .role-badge { padding: 3px 8px; border-radius: 4px; border: 1px solid; font-size: 11px; }
+    .role-admin { border-color: var(--danger); color: var(--danger); background: rgba(255,59,59,0.1); }
+    .role-viewer { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.1); }
+    .btn-logout { background: none; border: 1px solid var(--muted); color: var(--text-dim); cursor: pointer; padding: 4px 10px; transition: 0.2s;}
+    .btn-logout:hover { color: #fff; border-color: #fff; }
+
+    .container { display: grid; grid-template-columns: 1.2fr 1.6fr 1fr; gap: 20px; flex: 1; min-height: 0; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 15px; }
+    .panel-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid rgba(13, 42, 58, 0.4); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* ĐÈN GIAO THÔNG STATUS */
+    .light-unit { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(13, 42, 58, 0.2); border-radius: 6px; border-left: 4px solid var(--muted); transition: all 0.3s ease; }
+    .light-info-title { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+    .light-info-desc { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
+    .light-info-desc span { font-size: 16px; font-weight: 700; font-family: 'Share Tech Mono', monospace; color: var(--text); }
+    .light-circle { width: 40px; height: 40px; border-radius: 50%; background: #111; border: 2px solid #222; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); transition: all 0.3s ease; }
+    .light-unit.green.active { border-left-color: var(--green); background: rgba(0, 255, 157, 0.05); }
+    .light-unit.green.active .light-circle { background: var(--green); box-shadow: var(--glow-g); border-color: #fff; }
+    .light-unit.green.active .light-info-title { color: var(--green); }
+    .light-unit.yellow.active { border-left-color: var(--yellow); background: rgba(255, 214, 0, 0.05); }
+    .light-unit.yellow.active .light-circle { background: var(--yellow); box-shadow: var(--glow-y); border-color: #fff; }
+    .light-unit.yellow.active .light-info-title { color: var(--yellow); }
+    .light-unit.red.active { border-left-color: var(--red); background: rgba(255, 59, 59, 0.05); }
+    .light-unit.red.active .light-circle { background: var(--red); box-shadow: var(--glow-r); border-color: #fff; }
+    .light-unit.red.active .light-info-title { color: var(--red); }
+
+    /* OVERRIDE */
+    .override-panel { background: rgba(8, 15, 24, 0.6); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+    .override-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
+    .override-source { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); margin-bottom: 10px; }
+    .btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .btn-override { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 4px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: #fff; background: #0a1520; transition: 0.2s;}
+    .btn-peak:hover { background: var(--danger); } .btn-normal-mode:hover { background: var(--green); color: #000; } .btn-auto-mode:hover { background: var(--accent); color: #000; }
+    /* Lớp phủ vô hiệu hóa cho Khách */
+    .disabled-panel { opacity: 0.3; pointer-events: none; position: relative;}
+    #noAccessMsg { display: none; color: var(--danger); font-size: 11px; text-align: center; margin-top: 10px; font-family: 'Share Tech Mono';}
+
+    /* MAP AREA */
+    .map-area { flex: 1; min-height: 250px; position: relative; overflow: hidden; background: #030c15; border-radius: 6px; }
+    .intersection-svg { width: 100%; height: 100%; }
+
+    /* LOG BOX */
+    .log-box { font-family: 'Share Tech Mono', monospace; font-size: 11px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; height: 100%; overflow-y: auto; color: var(--text-dim); }
+    .log-item { margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed rgba(13, 42, 58, 0.3); }
+    .log-item.green-light { color: var(--green); } .log-item.red-light { color: var(--red); } .log-item.yellow-light { color: var(--yellow); }
+
+    #toast { visibility: hidden; min-width: 250px; background-color: var(--accent); color: #000; text-align: center; border-radius: 4px; padding: 10px; position: fixed; z-index: 9999; left: 50%; transform: translateX(-50%); bottom: 30px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: bold;}
+    #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+    #toast.error { background-color: var(--danger); color: white; }
+    @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+    @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+  </style>
+</head>
+<body>
+
+  <div id="loginScreen">
+    <div class="login-box">
+      <h2>SYSTEM LOGIN</h2>
+      <div class="input-group">
+        <label>USERNAME</label>
+        <input type="text" id="username" placeholder="Nhập tài khoản...">
+      </div>
+      <div class="input-group">
+        <label>PASSWORD</label>
+        <input type="password" id="password" placeholder="Nhập mật khẩu...">
+      </div>
+      <div id="loginError"></div>
+      <button class="btn-login" onclick="handleLogin()">ACCESS SYSTEM</button>
+      <div style="font-size: 11px; color: var(--text-dim); margin-top: 15px;">
+        Admin: admin/123456 | Khách: khach/123456
+      </div>
+    </div>
+  </div>
+
+  <div id="mainApp">
+    <header>
+      <h1>HCM TRAFFIC CONTROL</h1>
+      <div class="user-info">
+        <span id="sysTime" style="color: var(--green);">ONLINE</span>
+        <div style="width: 1px; height: 15px; background: var(--border);"></div>
+        <span id="displayUsername" style="color: var(--accent);">User</span>
+        <span id="displayRole" class="role-badge">Role</span>
+        <button class="btn-logout" onclick="handleLogout()">LOGOUT</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <div class="panel">
+        <div class="panel-title"><span>TRAFFIC LIGHT STATUS</span></div>
+        <div class="light-unit green" id="boxGreen"><div><div class="light-info-title">ĐÈN XANH</div><div class="light-info-desc">Thời gian còn lại: <span id="greenCount">--</span> s</div></div><div class="light-circle"></div></div>
+        <div class="light-unit yellow" id="boxYellow"><div><div class="light-info-title">ĐÈN VÀNG</div><div class="light-info-desc">Thời gian còn lại: <span id="yellowCount">--</span> s</div></div><div class="light-circle"></div></div>
+        <div class="light-unit red" id="boxRed"><div><div class="light-info-title">ĐÈN ĐỎ</div><div class="light-info-desc">Thời gian còn lại: <span id="redCount">--</span> s</div></div><div class="light-circle"></div></div>
+
+        <div class="override-panel" id="controlPanel">
+          <div class="override-title">MANUAL OVERRIDE (ADMIN ONLY)</div>
+          <div class="override-source">SOURCE: <span class="src-auto" id="srcLabel" style="color: var(--accent)">AUTO</span></div>
+          <div class="btn-row">
+            <button class="btn-override btn-peak" onclick="sendOverrideMode('peak_hour')">⚡ PEAK<br>HOUR</button>
+            <button class="btn-override btn-normal-mode" onclick="sendOverrideMode('normal')">◎ NORMAL<br>MODE</button>
+            <button class="btn-override btn-auto-mode" onclick="sendOverrideMode('auto')">⟳ AUTO<br>DETECT</button>
+          </div>
+          <div id="noAccessMsg">⚠ CHỈ ADMIN MỚI CÓ QUYỀN ĐIỀU KHIỂN</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span>INTERSECTION MONITOR</span></div>
+        <div class="map-area">
+          <svg class="intersection-svg" viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+            <rect width="600" height="360" fill="#030c15"/>
+            <defs><pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(0,212,255,0.05)" stroke-width="0.5"/></pattern></defs>
+            <rect width="600" height="360" fill="url(#grid)"/>
+            <rect x="0" y="145" width="600" height="70" fill="#0a1820"/><rect x="265" y="0" width="70" height="360" fill="#0a1820"/>
+            <line x1="0" y1="145" x2="265" y2="145" stroke="#0d2a3a" stroke-width="2"/><line x1="335" y1="145" x2="600" y2="145" stroke="#0d2a3a" stroke-width="2"/><line x1="0" y1="215" x2="265" y2="215" stroke="#0d2a3a" stroke-width="2"/><line x1="335" y1="215" x2="600" y2="215" stroke="#0d2a3a" stroke-width="2"/><line x1="265" y1="0" x2="265" y2="145" stroke="#0d2a3a" stroke-width="2"/><line x1="335" y1="0" x2="335" y2="145" stroke="#0d2a3a" stroke-width="2"/><line x1="265" y1="215" x2="265" y2="360" stroke="#0d2a3a" stroke-width="2"/><line x1="335" y1="215" x2="335" y2="360" stroke="#0d2a3a" stroke-width="2"/>
+            <line x1="0" y1="180" x2="265" y2="180" stroke="#1a3a50" stroke-width="1.5" stroke-dasharray="10,8"/><line x1="335" y1="180" x2="600" y2="180" stroke="#1a3a50" stroke-width="1.5" stroke-dasharray="10,8"/><line x1="300" y1="0" x2="300" y2="145" stroke="#1a3a50" stroke-width="1.5" stroke-dasharray="10,8"/><line x1="300" y1="215" x2="300" y2="360" stroke="#1a3a50" stroke-width="1.5" stroke-dasharray="10,8"/>
+            <line x1="255" y1="180" x2="255" y2="215" stroke="#c8e8f0" stroke-width="3"/><line x1="345" y1="145" x2="345" y2="180" stroke="#c8e8f0" stroke-width="3"/><line x1="265" y1="135" x2="300" y2="135" stroke="#c8e8f0" stroke-width="3"/><line x1="300" y1="225" x2="335" y2="225" stroke="#c8e8f0" stroke-width="3"/>
+            <circle id="tl-main-1" cx="240" cy="200" r="7" fill="#00ff9d" stroke="#111" stroke-width="2"/><circle id="tl-main-2" cx="360" cy="160" r="7" fill="#00ff9d" stroke="#111" stroke-width="2"/>
+            <circle id="tl-sub-1" cx="280" cy="120" r="7" fill="#ff3b3b" stroke="#111" stroke-width="2"/><circle id="tl-sub-2" cx="320" cy="240" r="7" fill="#ff3b3b" stroke="#111" stroke-width="2"/>
+            <rect id="car1" x="-30" y="188" width="26" height="14" rx="3" fill="#00d4ff"/><rect id="car2" x="630" y="158" width="26" height="14" rx="3" fill="#ff9900"/><rect id="car3" x="273" y="-30" width="14" height="26" rx="3" fill="#ff3b3b"/><rect id="car4" x="313" y="380" width="14" height="26" rx="3" fill="#00ff9d"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title"><span>LOG MONITOR</span></div>
+        <div class="log-box" id="logBox"><div class="log-item">Đang kết nối hệ thống...</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // --- QUẢN LÝ ĐĂNG NHẬP & PHÂN QUYỀN ---
+    function checkLoginStatus() {
+      const savedUser = localStorage.getItem('traffic_username');
+      const savedRole = localStorage.getItem('traffic_role');
+      
+      if (savedUser && savedRole) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+        
+        // Hiển thị thông tin user
+        document.getElementById('displayUsername').textContent = savedUser.toUpperCase();
+        const roleBadge = document.getElementById('displayRole');
+        roleBadge.textContent = savedRole.toUpperCase();
+        
+        // Phân quyền giao diện
+        if (savedRole === 'admin') {
+          roleBadge.className = 'role-badge role-admin';
+          document.getElementById('controlPanel').classList.remove('disabled-panel');
+          document.getElementById('noAccessMsg').style.display = 'none';
+        } else {
+          roleBadge.className = 'role-badge role-viewer';
+          document.getElementById('controlPanel').classList.add('disabled-panel');
+          document.getElementById('noAccessMsg').style.display = 'block';
+        }
+      } else {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('mainApp').style.display = 'none';
+      }
+    }
+
+    function handleLogin() {
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const err = document.getElementById('loginError');
+
+      fetch('http://127.0.0.1:5001/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      })
+      .then(res => res.json().then(data => ({ status: res.status, body: data })))
+      .then(res => {
+        if (res.status === 200) {
+          localStorage.setItem('traffic_username', res.body.username);
+          localStorage.setItem('traffic_role', res.body.role);
+          err.textContent = "";
+          checkLoginStatus();
+          showToast(res.body.message);
+        } else {
+          err.textContent = res.body.message;
+        }
+      }).catch(() => { err.textContent = "Không thể kết nối đến máy chủ!"; });
+    }
+
+    function handleLogout() {
+      localStorage.removeItem('traffic_username');
+      localStorage.removeItem('traffic_role');
+      checkLoginStatus();
+    }
+
+    // --- LOGIC HỆ THỐNG GIAO THÔNG (Giữ nguyên) ---
+    function updateSysTime() {
+      const now = new Date(); document.getElementById('sysTime').innerText = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
+    }
+    setInterval(updateSysTime, 1000); updateSysTime();
+
+    function showToast(msg, isError = false) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = isError ? 'toast show error' : 'toast show';
+      setTimeout(() => { t.classList.remove('show'); }, 3000);
+    }
+
+    function sendOverrideMode(modeType) {
+      const currentUser = localStorage.getItem('traffic_username');
+      fetch('http://127.0.0.1:5001/api/override', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: modeType, username: currentUser }), // Gửi kèm tên để server ktra
+      })
+      .then(res => res.json().then(data => ({ status: res.status, body: data })))
+      .then(res => {
+        if (res.status === 200) {
+          showToast(res.body.message);
+          document.getElementById('srcLabel').textContent = modeType.toUpperCase();
+        } else {
+          showToast(res.body.message, true);
+        }
+      }).catch(e => showToast("Lỗi kết nối Server", true));
+    }
+
+    let currentMainLight = 'green';
+    let car1x = -30, car2x = 630, car3y = -30, car4y = 380; const speed = 1.2;
+    function animateCars() {
+      let currentSubLight = (currentMainLight === 'red') ? 'green' : 'red';
+      if ((currentMainLight === 'red' || currentMainLight === 'yellow') && (car1x >= 210 && car1x <= 220)) {} else { car1x += speed; } if (car1x > 630) car1x = -50;
+      if ((currentMainLight === 'red' || currentMainLight === 'yellow') && (car2x <= 360 && car2x >= 350)) {} else { car2x -= speed; } if (car2x < -50) car2x = 630;
+      if ((currentSubLight === 'red' || currentSubLight === 'yellow') && (car3y >= 90 && car3y <= 100)) {} else { car3y += speed; } if (car3y > 380) car3y = -50;
+      if ((currentSubLight === 'red' || currentSubLight === 'yellow') && (car4y <= 235 && car4y >= 225)) {} else { car4y -= speed; } if (car4y < -50) car4y = 380;
+      document.getElementById('car1').setAttribute('x', car1x); document.getElementById('car2').setAttribute('x', car2x); document.getElementById('car3').setAttribute('y', car3y); document.getElementById('car4').setAttribute('y', car4y);
+      requestAnimationFrame(animateCars);
+    }
+    animateCars();
+
+    function fetchLogs() {
+      if(document.getElementById('mainApp').style.display === 'none') return; // Không lấy log nếu chưa đăng nhập
+      fetch('http://127.0.0.1:5001/api/logs')
+        .then(response => response.json())
+        .then(data => {
+          if (!data || data.length === 0) return;
+          let html = '';
+          const displayData = data.slice(0, 25); 
+          displayData.forEach(log => {
+            let colorMap = { "GREEN": "green-light", "RED": "red-light", "YELLOW": "yellow-light" };
+            html += `<div class="log-item ${colorMap[log.light.toUpperCase()] || ''}">[${log.time}] | CĐ: ${log.mode.toUpperCase()} | ${log.light.toUpperCase()}: ${log.remaining}s</div>`;
+          });
+          document.getElementById('logBox').innerHTML = html;
+
+          const current = data[0];
+          currentMainLight = current.light;
+          document.getElementById('greenCount').textContent = '--'; document.getElementById('yellowCount').textContent = '--'; document.getElementById('redCount').textContent = '--';
+          document.getElementById('boxGreen').classList.remove('active'); document.getElementById('boxYellow').classList.remove('active'); document.getElementById('boxRed').classList.remove('active');
+
+          const mapColors = { 'green': '#00ff9d', 'yellow': '#ffd600', 'red': '#ff3b3b' };
+          if (current.light === 'green') { document.getElementById('greenCount').textContent = current.remaining; document.getElementById('boxGreen').classList.add('active'); }
+          else if (current.light === 'yellow') { document.getElementById('yellowCount').textContent = current.remaining; document.getElementById('boxYellow').classList.add('active'); }
+          else if (current.light === 'red') { document.getElementById('redCount').textContent = current.remaining; document.getElementById('boxRed').classList.add('active'); }
+
+          let subColor = (current.light === 'red') ? mapColors['green'] : mapColors['red'];
+          document.getElementById('tl-main-1').setAttribute('fill', mapColors[current.light]); document.getElementById('tl-main-2').setAttribute('fill', mapColors[current.light]);
+          document.getElementById('tl-sub-1').setAttribute('fill', subColor); document.getElementById('tl-sub-2').setAttribute('fill', subColor);
+        }).catch(() => {});
+    }
+
+    // Khởi chạy khi Load trang
+    checkLoginStatus();
+    setInterval(fetchLogs, 1000); 
+  </script>
+</body>
+</html>
