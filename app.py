@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import sqlite3
 from datetime import datetime
@@ -127,10 +127,9 @@ def set_override():
         return jsonify({"message": f"Chuyển chế độ: {mode.upper()}", "status": override_status}), 200
     return jsonify({"message": "Chế độ không hợp lệ"}), 400
 
-@app.route("/api/override", methods=["GET"])
-def get_override():
-    global override_status
-    return jsonify(override_status), 200
+@app.route("/", methods=["GET"])
+def home():
+    return render_template("index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)
