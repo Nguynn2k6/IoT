@@ -127,10 +127,12 @@ def set_override():
     if not user or user[0] != 'admin':
         return jsonify({"message": "LỖI: Bạn không có quyền Admin!"}), 403
 
-    # Đã thêm "emergency" vào danh sách cho phép
-    if mode in ["peak_hour", "normal", "auto", "emergency"]:
+    # DANH SÁCH CÁC CHẾ ĐỘ ĐƯỢC PHÉP (Đã thêm cả 2 chế độ emergency)
+    if mode in ["peak_hour", "normal", "auto", "emergency_main", "emergency_sub"]:
         override_status["mode"] = mode
         return jsonify({"message": f"Chuyển chế độ: {mode.upper()}", "status": override_status}), 200
+    
+    # Nếu gửi lên mã không nằm trong danh sách trên, sẽ báo lỗi này:
     return jsonify({"message": "Chế độ không hợp lệ"}), 400
 
 @app.route("/api/override", methods=["GET"])
