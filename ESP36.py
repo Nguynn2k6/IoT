@@ -40,42 +40,51 @@ def send_log(mode, light, remaining):
         print(f"Lỗi gửi dữ liệu: {e}")
 
 def run_interruptible_phase(light, duration, start_mode):
-    """Chạy đếm lùi, nhưng kiểm tra lệnh khẩn cấp mỗi giây để ngắt ngang"""
+    """Chạy đếm lùi, kiểm tra lệnh khẩn cấp mỗi giây để ngắt ngang lập tức"""
     for remaining in range(duration, 0, -1):
         current_mode = get_mode()
-        # Nếu đang đếm mà có lệnh khẩn cấp -> Lập tức thoát vòng lặp
-        if current_mode == "emergency":
-            return "emergency"
+        # Nếu có lệnh khẩn cấp -> Bẻ khóa vòng lặp
+        if current_mode in ["emergency_main", "emergency_sub"]:
+            return current_mode
         
         send_log(current_mode, light, remaining)
         time.sleep(1)
     return "done"
 
 def traffic_light_loop():
-    print("=" * 60)
-    print("  Hệ thống Giao thông Thông minh (Có hỗ trợ Khẩn cấp)")
-    print("=" * 60)
+    print("=" * 65)
+    print("  Hệ thống Giao thông Thông minh (Nâng cấp Cấp Cứu 2 Chiều)")
+    print("=" * 65)
 
     while True:
         mode = get_mode()
 
-        # NẾU LÀ CHẾ ĐỘ KHẨN CẤP
-        if mode == "emergency":
-            print("\n🚨 [BÁO ĐỘNG] XE ƯU TIÊN - KÍCH HOẠT ĐÈN XANH TUYẾN CHÍNH 🚨")
-            # Giữ đèn xanh vô thời hạn (hiển thị số 99), đường phụ sẽ tự đỏ
-            while get_mode() == "emergency":
-                send_log("emergency", "green", 99) 
+        # --- ƯU TIÊN TUYẾN CHÍNH ---
+        if mode == "emergency_main":
+            print("\n🚨 [BÁO ĐỘNG] XE CỨU THƯƠNG - KÍCH HOẠT XANH TUYẾN CHÍNH 🚨")
+            while get_mode() == "emergency_main":
+                send_log("emergency_main", "green", 99) 
                 time.sleep(1)
-            print("\n✅ ĐÃ HẾT TÌNH TRẠNG KHẨN CẤP, KHÔI PHỤC CHU KỲ...")
-            continue # Quay lại chu kỳ bình thường từ đầu
+            print("\n✅ ĐÃ HẾT TÌNH TRẠNG KHẨN CẤP, KHÔI PHỤC...")
+            continue 
 
-        # NẾU LÀ CHẾ ĐỘ BÌNH THƯỜNG / CAO ĐIỂM
+        # --- ƯU TIÊN TUYẾN PHỤ ---
+        if mode == "emergency_sub":
+            print("\n🚨 [BÁO ĐỘNG] XE CỨU THƯƠNG - KÍCH HOẠT XANH TUYẾN PHỤ 🚨")
+            while get_mode() == "emergency_sub":
+                # Tuyến phụ xanh đồng nghĩa với Tuyến chính bị ép Đỏ
+                send_log("emergency_sub", "red", 99) 
+                time.sleep(1)
+            print("\n✅ ĐÃ HẾT TÌNH TRẠNG KHẨN CẤP, KHÔI PHỤC...")
+            continue 
+
+        # --- CHU KỲ BÌNH THƯỜNG / CAO ĐIỂM ---
         green_time = get_green_time(mode)
         print(f"\n--- Chu kỳ mới | {mode.upper()} | Xanh={green_time}s Vàng={YELLOW_TIME}s Đỏ={RED_TIME}s ---")
 
-        if run_interruptible_phase("green", green_time, mode) == "emergency": continue
-        if run_interruptible_phase("yellow", YELLOW_TIME, mode) == "emergency": continue
-        if run_interruptible_phase("red", RED_TIME, mode) == "emergency": continue
+        if run_interruptible_phase("green", green_time, mode) in ["emergency_main", "emergency_sub"]: continue
+        if run_interruptible_phase("yellow", YELLOW_TIME, mode) in ["emergency_main", "emergency_sub"]: continue
+        if run_interruptible_phase("red", RED_TIME, mode) in ["emergency_main", "emergency_sub"]: continue
 
 if __name__ == "__main__":
     try:
