@@ -15,35 +15,20 @@
       --glow-r: 0 0 20px rgba(255,59,59,0.8);
       --glow-y: 0 0 20px rgba(255,214,0,0.8);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color: var(--bg); color: var(--text); font-family: 'Rajdhani', sans-serif; height: 100vh; overflow: hidden; }
 
-    /* MÀN HÌNH ĐĂNG NHẬP */
-    #loginScreen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(3, 12, 21, 0.95); display: flex; justify-content: center; align-items: center; z-index: 1000;
-    }
-    .login-box {
-      background: var(--panel); border: 2px solid var(--border); padding: 40px; border-radius: 8px;
-      width: 350px; text-align: center; box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
-    }
+    #loginScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 12, 21, 0.95); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .login-box { background: var(--panel); border: 2px solid var(--border); padding: 40px; border-radius: 8px; width: 350px; text-align: center; box-shadow: 0 0 30px rgba(0, 212, 255, 0.1); }
     .login-box h2 { font-family: 'Orbitron', sans-serif; color: var(--accent); margin-bottom: 25px; letter-spacing: 2px; }
     .input-group { margin-bottom: 15px; text-align: left; }
     .input-group label { font-size: 12px; color: var(--text-dim); font-family: 'Orbitron', sans-serif; }
-    .input-group input {
-      width: 100%; padding: 10px; margin-top: 5px; background: rgba(0,0,0,0.5);
-      border: 1px solid var(--muted); color: var(--text); font-family: 'Share Tech Mono', monospace; outline: none;
-    }
+    .input-group input { width: 100%; padding: 10px; margin-top: 5px; background: rgba(0,0,0,0.5); border: 1px solid var(--muted); color: var(--text); font-family: 'Share Tech Mono', monospace; outline: none; }
     .input-group input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
-    .btn-login {
-      width: 100%; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent);
-      color: var(--accent); font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s;
-    }
+    .btn-login { width: 100%; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 1px solid var(--accent); color: var(--accent); font-family: 'Orbitron', sans-serif; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
     .btn-login:hover { background: var(--accent); color: #000; }
     #loginError { color: var(--danger); font-size: 13px; margin-top: 10px; min-height: 15px;}
 
-    /* MÀN HÌNH CHÍNH APP */
     #mainApp { padding: 20px; display: none; flex-direction: column; height: 100%; }
     header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
     h1 { font-family: 'Orbitron', sans-serif; font-size: 20px; color: var(--accent); letter-spacing: 1px; }
@@ -58,7 +43,6 @@
     .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 15px; }
     .panel-title { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid rgba(13, 42, 58, 0.4); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* ĐÈN GIAO THÔNG STATUS */
     .light-unit { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; background: rgba(13, 42, 58, 0.2); border-radius: 6px; border-left: 4px solid var(--muted); transition: all 0.3s ease; }
     .light-info-title { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
     .light-info-desc { font-size: 12px; color: var(--text-dim); margin-top: 5px; }
@@ -74,18 +58,14 @@
     .light-unit.red.active .light-circle { background: var(--red); box-shadow: var(--glow-r); border-color: #fff; }
     .light-unit.red.active .light-info-title { color: var(--red); }
 
-    /* OVERRIDE BUTTONS */
     .override-panel { background: rgba(8, 15, 24, 0.6); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
     .override-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
     .override-source { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); margin-bottom: 10px; }
     
     .btn-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .btn-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    
     .btn-override { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 4px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: #fff; background: #0a1520; transition: 0.2s;}
     .btn-peak:hover { background: var(--danger); } .btn-normal-mode:hover { background: var(--green); color: #000; } .btn-auto-mode:hover { background: var(--accent); color: #000; }
-    
-    /* Hiệu ứng nhấp nháy cho nút cấp cứu */
     .btn-emergency { background: #ff0000; color: #fff; border-color: #ff3b3b; animation: pulse 1.5s infinite; font-size: 11px; padding: 10px 4px;}
     .btn-emergency:hover { background: #cc0000; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.7); } 70% { box-shadow: 0 0 0 8px rgba(255, 59, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0); } }
@@ -93,11 +73,9 @@
     .disabled-panel { opacity: 0.3; pointer-events: none; position: relative;}
     #noAccessMsg { display: none; color: var(--danger); font-size: 11px; text-align: center; margin-top: 10px; font-family: 'Share Tech Mono';}
 
-    /* MAP AREA */
     .map-area { flex: 1; min-height: 250px; position: relative; overflow: hidden; background: #030c15; border-radius: 6px; }
     .intersection-svg { width: 100%; height: 100%; }
 
-    /* LOG BOX */
     .log-box { font-family: 'Share Tech Mono', monospace; font-size: 11px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; height: 100%; overflow-y: auto; color: var(--text-dim); }
     .log-item { margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed rgba(13, 42, 58, 0.3); }
     .log-item.green-light { color: var(--green); } .log-item.red-light { color: var(--red); } .log-item.yellow-light { color: var(--yellow); }
@@ -274,7 +252,6 @@
       .then(res => {
         if (res.status === 200) {
           showToast(res.body.message);
-          // Hiển thị tên chế độ gọn gàng (vd: EMERGENCY MAIN -> EMERGENCY MAIN)
           document.getElementById('srcLabel').textContent = modeType.toUpperCase().replace('_', ' ');
         } else {
           showToast(res.body.message, true);
@@ -325,7 +302,6 @@
             document.getElementById('boxYellow').classList.add('active'); 
           }
           else if (current.light === 'red') { 
-            // Nếu gửi 99 và đang Đỏ (nghĩa là đang cấp cứu cho tuyến Phụ) -> Đèn đỏ hiện ∞
             document.getElementById('redCount').textContent = current.remaining === 99 ? '∞' : current.remaining; 
             document.getElementById('boxRed').classList.add('active'); 
           }

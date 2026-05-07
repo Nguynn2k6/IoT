@@ -40,20 +40,27 @@ def send_log(mode, light, remaining):
         print(f"Lỗi gửi dữ liệu: {e}")
 
 def run_interruptible_phase(light, duration, start_mode):
-    """Chạy đếm lùi, kiểm tra lệnh khẩn cấp mỗi giây để ngắt ngang lập tức"""
+    """Chạy đếm lùi, kiểm tra lệnh khẩn cấp và loại bỏ độ trễ mạng"""
     for remaining in range(duration, 0, -1):
+        start_time = time.time() # Bắt đầu bấm giờ
+        
         current_mode = get_mode()
-        # Nếu có lệnh khẩn cấp -> Bẻ khóa vòng lặp
         if current_mode in ["emergency_main", "emergency_sub"]:
             return current_mode
         
         send_log(current_mode, light, remaining)
-        time.sleep(1)
+        
+        # Chỉ ngủ phần thời gian còn lại để tròn 1 giây
+        elapsed_time = time.time() - start_time
+        sleep_time = 1.0 - elapsed_time
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+            
     return "done"
 
 def traffic_light_loop():
     print("=" * 65)
-    print("  Hệ thống Giao thông Thông minh (Nâng cấp Cấp Cứu 2 Chiều)")
+    print("  Hệ thống Giao thông Thông minh (Đã tối ưu độ trễ mạng)")
     print("=" * 65)
 
     while True:
@@ -63,8 +70,13 @@ def traffic_light_loop():
         if mode == "emergency_main":
             print("\n🚨 [BÁO ĐỘNG] XE CỨU THƯƠNG - KÍCH HOẠT XANH TUYẾN CHÍNH 🚨")
             while get_mode() == "emergency_main":
+                start_time = time.time()
                 send_log("emergency_main", "green", 99) 
-                time.sleep(1)
+                
+                elapsed_time = time.time() - start_time
+                sleep_time = 1.0 - elapsed_time
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
             print("\n✅ ĐÃ HẾT TÌNH TRẠNG KHẨN CẤP, KHÔI PHỤC...")
             continue 
 
@@ -72,9 +84,13 @@ def traffic_light_loop():
         if mode == "emergency_sub":
             print("\n🚨 [BÁO ĐỘNG] XE CỨU THƯƠNG - KÍCH HOẠT XANH TUYẾN PHỤ 🚨")
             while get_mode() == "emergency_sub":
-                # Tuyến phụ xanh đồng nghĩa với Tuyến chính bị ép Đỏ
+                start_time = time.time()
                 send_log("emergency_sub", "red", 99) 
-                time.sleep(1)
+                
+                elapsed_time = time.time() - start_time
+                sleep_time = 1.0 - elapsed_time
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
             print("\n✅ ĐÃ HẾT TÌNH TRẠNG KHẨN CẤP, KHÔI PHỤC...")
             continue 
 

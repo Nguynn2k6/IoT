@@ -7,13 +7,11 @@ app = Flask(__name__)
 CORS(app)
 DB_NAME = "traffic.db"
 
-# Biến lưu trữ trạng thái override
 override_status = {"mode": "auto"}
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS traffic_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +21,6 @@ def init_db():
             remaining INTEGER
         )
     """)
-    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +29,6 @@ def init_db():
             role TEXT
         )
     """)
-    
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS login_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,12 +36,10 @@ def init_db():
             login_time TEXT
         )
     """)
-    
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute("INSERT INTO users (username, password, role) VALUES ('admin', '123456', 'admin')")
         cursor.execute("INSERT INTO users (username, password, role) VALUES ('khach', '123456', 'viewer')")
-    
     conn.commit()
     conn.close()
 
@@ -127,12 +121,9 @@ def set_override():
     if not user or user[0] != 'admin':
         return jsonify({"message": "LỖI: Bạn không có quyền Admin!"}), 403
 
-    # DANH SÁCH CÁC CHẾ ĐỘ ĐƯỢC PHÉP (Đã thêm cả 2 chế độ emergency)
     if mode in ["peak_hour", "normal", "auto", "emergency_main", "emergency_sub"]:
         override_status["mode"] = mode
         return jsonify({"message": f"Chuyển chế độ: {mode.upper()}", "status": override_status}), 200
-    
-    # Nếu gửi lên mã không nằm trong danh sách trên, sẽ báo lỗi này:
     return jsonify({"message": "Chế độ không hợp lệ"}), 400
 
 @app.route("/api/override", methods=["GET"])
