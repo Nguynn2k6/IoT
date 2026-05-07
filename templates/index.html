@@ -79,11 +79,14 @@
     .override-panel { background: rgba(8, 15, 24, 0.6); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
     .override-title { font-family: 'Orbitron', sans-serif; font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
     .override-source { font-size: 11px; font-family: 'Share Tech Mono', monospace; color: var(--text-dim); margin-bottom: 10px; }
-    .btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+    .btn-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
     .btn-override { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; padding: 12px 4px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: #fff; background: #0a1520; transition: 0.2s;}
     .btn-peak:hover { background: var(--danger); } .btn-normal-mode:hover { background: var(--green); color: #000; } .btn-auto-mode:hover { background: var(--accent); color: #000; }
     .disabled-panel { opacity: 0.3; pointer-events: none; position: relative;}
     #noAccessMsg { display: none; color: var(--danger); font-size: 11px; text-align: center; margin-top: 10px; font-family: 'Share Tech Mono';}
+    .btn-emergency { background: #ff0000; color: #fff; border-color: #ff3b3b; animation: pulse 1s infinite; }
+    .btn-emergency:hover { background: #cc0000; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(255, 59, 59, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 59, 0); } }
 
     /* MAP AREA */
     .map-area { flex: 1; min-height: 250px; position: relative; overflow: hidden; background: #030c15; border-radius: 6px; }
@@ -145,6 +148,7 @@
           <div class="override-title">MANUAL OVERRIDE (ADMIN ONLY)</div>
           <div class="override-source">SOURCE: <span class="src-auto" id="srcLabel" style="color: var(--accent)">AUTO</span></div>
           <div class="btn-row">
+            <button class="btn-override btn-emergency" onclick="sendOverrideMode('emergency')">🚑 KHẨN<br>CẤP</button>
             <button class="btn-override btn-peak" onclick="sendOverrideMode('peak_hour')">⚡ PEAK<br>HOUR</button>
             <button class="btn-override btn-normal-mode" onclick="sendOverrideMode('normal')">◎ NORMAL<br>MODE</button>
             <button class="btn-override btn-auto-mode" onclick="sendOverrideMode('auto')">⟳ AUTO<br>DETECT</button>
@@ -301,7 +305,12 @@
           document.getElementById('boxGreen').classList.remove('active'); document.getElementById('boxYellow').classList.remove('active'); document.getElementById('boxRed').classList.remove('active');
 
           const mapColors = { 'green': '#00ff9d', 'yellow': '#ffd600', 'red': '#ff3b3b' };
-          if (current.light === 'green') { document.getElementById('greenCount').textContent = current.remaining; document.getElementById('boxGreen').classList.add('active'); }
+          
+          if (current.light === 'green') { 
+            // HIỆN VÔ CỰC NẾU LÀ SỐ 99 CỦA CHẾ ĐỘ KHẨN CẤP
+            document.getElementById('greenCount').textContent = current.remaining === 99 ? '∞' : current.remaining; 
+            document.getElementById('boxGreen').classList.add('active'); 
+          }
           else if (current.light === 'yellow') { document.getElementById('yellowCount').textContent = current.remaining; document.getElementById('boxYellow').classList.add('active'); }
           else if (current.light === 'red') { document.getElementById('redCount').textContent = current.remaining; document.getElementById('boxRed').classList.add('active'); }
 

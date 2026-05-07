@@ -14,7 +14,6 @@ def init_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     
-    # Bảng lưu log đèn giao thông
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS traffic_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +24,6 @@ def init_db():
         )
     """)
     
-    # Bảng lưu tài khoản người dùng
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +33,6 @@ def init_db():
         )
     """)
     
-    # Bảng lưu lịch sử đăng nhập
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS login_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,7 +41,6 @@ def init_db():
         )
     """)
     
-    # Tạo sẵn 2 tài khoản mẫu nếu database chưa có
     cursor.execute("SELECT COUNT(*) FROM users")
     if cursor.fetchone()[0] == 0:
         cursor.execute("INSERT INTO users (username, password, role) VALUES ('admin', '123456', 'admin')")
@@ -131,7 +127,8 @@ def set_override():
     if not user or user[0] != 'admin':
         return jsonify({"message": "LỖI: Bạn không có quyền Admin!"}), 403
 
-    if mode in ["peak_hour", "normal", "auto"]:
+    # Đã thêm "emergency" vào danh sách cho phép
+    if mode in ["peak_hour", "normal", "auto", "emergency"]:
         override_status["mode"] = mode
         return jsonify({"message": f"Chuyển chế độ: {mode.upper()}", "status": override_status}), 200
     return jsonify({"message": "Chế độ không hợp lệ"}), 400
